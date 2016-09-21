@@ -1,6 +1,7 @@
 #!c:/python27/python
 import util
 import json
+import datetime
 
 class Employee:
 
@@ -23,6 +24,8 @@ class Workflow:
 		if j==None:
 			self.flow_ID = util.generateID(8)
 			self.data = None
+			self.status = None
+			self.datetime = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 		else:
 			self.__dict__ = json.loads(j)
 
@@ -81,6 +84,9 @@ class Workflow:
 	def setProgram(self, program_code, program):
 		self.program_code = program_code
 		self.program = program
+
+	def setRTN(self, rtn):
+		self.rtn = rtn
 
 	def getCurStatusDesc(self):
 		stages = self.getCurrentStages()
