@@ -2,15 +2,14 @@
 import util
 import json
 import datetime
-import time
 
 class Employee:
 
 	def __init__(self, name, role, email, j):
 		if j == None:
 			self.name = name
-			self.role = role
 			self.email = email
+			self.role = role
 			self.eid = util.generateID(6)
 		else:
 			self.__dict__ = json.loads(j)
@@ -24,22 +23,28 @@ class Workflow:
 
 	def __init__(self, j):
 		if j==None:
+			self.pmflag = False
 			self.flow_ID = util.generateID(8)
 			self.data = None
 			self.status = None
-			self.datetime = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+			self.isSimple = True
+			self.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 		else:
 			self.__dict__ = json.loads(j)
 
 	def setData(self, data):
 		self.data = data
 
+	def assignPMForSize(self, name):
+		self.sizePM = name
+		self.pmflag = True
+
 	def configSimpleFlow(self, name):
 		flow = []
 		stages = [1]
 		stages[0] = Workstage(None, 1, Workflow.pending, Workstage.PM2)
 
-
+	
 		flow.append(stages)
 		flow.append([])
 		flow.append([])
@@ -96,14 +101,14 @@ class Workflow:
 			return stages[0].status_desc
 		else:
 			return None
-
+			
 # each work stage represents an item in the pending list
 class  Workstage:
 
 	PM2 = "Waiting for Analyst Selection"
 	AN3 = "Waiting for Analyst Assessment"
 	PM4 = "Waiting for Project Manager Approvement"
-	PM5 = "Project Approved"
+	PM5 = "Approved"
 	idsize = 6
 
 	def __init__(self, j, stage, status, status_desc):
