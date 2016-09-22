@@ -79,6 +79,15 @@ def analystAssessment(request):
 	print "one analyst task finished"
 	return f
 
+def sizePMAssignmentStage(request):
+	pmname = request['pmname']
+	f_id = getFlowIdFromRequest(request)
+	f = db.findByFlowId(f_id)[0]
+	f.assignPMForSize(pmname)
+	f.status = f.getCurStatusDesc()
+	db.updateFlow(f)
+	return f
+	
 #request coming from Pending page, triggered by PM
 #get PM from w itself, update PM and persist, @return Workflow
 def moveToPMApproveStage(request, workflow):
