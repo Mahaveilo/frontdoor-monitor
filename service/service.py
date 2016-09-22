@@ -2,6 +2,7 @@
 
 import util
 import db
+import emailservice
 from domain import Employee
 from domain import Workflow
 from domain import Workstage
@@ -23,11 +24,12 @@ def createNewSimpleWorkFlowStage(request):
 	assignPMToStage(w, request)
 	teams = getTeamsFromRequest(request)
 	programs = getProgramsFromRequest(request)
+	rtn = getRTNFromRequest(request)
 	w.setTeam(None, teams)
 	w.setProgram(None, programs)
+	w.setRTN(rtn)
 	data = getDataFromRequest(request)
 	w.setData(data)
-        w.setRTN(request['projectRTN'])
 	w.status = w.getCurStatusDesc()
 	db.insertDummy(w)
 	return w
@@ -128,12 +130,19 @@ def PMFinalAction(request, status_desc, status_code):
 	for stage in stages2:
 		if status_code == Workflow.failed:
 			stage.status = Workflow.pending
+		else:
+			stage.status = Workflow.success
 		stage.status_desc = status_desc
 	stages1 = f.flow[0]
 	for stage in stages1:
+		if status_code == Workflow.failed:
+			stage.status = Workflow.pending
+		else:
+			stage.status = Workflow.success
 		stage.status_desc = status_desc
 	f.status =f.getCurStatusDesc()
 	db.updateFlow(f)
+	emailservice.sendEmail(f)
 	return f
 
 # ***************************************** Assign employees to stages ************************************************
@@ -190,15 +199,15 @@ def getAnalystFromRequest(request):
 def getCurrentUserFromRequest(request):
 	raise ValueError("Not implemented")
 
-def createNewEmployee(name, role):
-	e = Employee(name, role, None)
+def createNewEmployee(name, role, email):
+	e = Employee(name, role, email, None)
 	db.insertEmployee(e)
 
-def createNewPM(name):
-	createNewEmployee(name, "Project Manager")
+def createNewPM(name, email):
+	createNewEmployee(name, "Project Manager", email)
 
-def createNewAnalyst(name):
-	createNewEmployee(name, "Analyst")
+def createNewAnalyst(name, email):
+	createNewEmployee(name, "Analyst", email)
 
 
 
@@ -213,12 +222,16 @@ def createNewAnalyst(name):
 
 #extract pm information from request, just a name and role for now
 #similarly, extract analyst information
+def getRTNFromRequest(request):
+	return "820820"
+
 def getPMIDFromRequest(request):
-    teamtype = request["teamType"]
-    return teamMap[teamtype];
+    # teamtype = request["teamType"]
+    # return teamMap[teamtype];
+    return "epwkkx828208"
 
 def getAnalyticsIDFromRequest(request):
-	# return "zcfqke061605"
+	# return "jzigml339281"
 	return "oxsqtr318710"
 
 def getAnalyticsIDsFromRequest(request):
@@ -228,28 +241,28 @@ def getAnalyticsIDsFromRequest(request):
 def getanalyst(request):
 	randomid = util.generateID(8)
 	randomid2 = util.generateID(8)
-	ana1 = Employee("Joe", "analyst")
-	ana2 = Employee("Raman", "analyst")
+	ana1 = Employee("Joe", "analyst", "youye@visa.com")
+	ana2 = Employee("Raman", "analyst", "youye@visa.com")
 	ana = []
 	ana.append(ana1)
 	ana.append(ana2)
 	return ana
 #extract flow id from request
 def getFlowIdFromRequest(request):
-	return "pichtwei41981489"
+	return "ykwgxiih76842891"
 
 def getTeamsFromRequest(request):
 	# res = []
 	# res.append("R")
-	# res.append("Risk and Authetication")
-        return request['teamType']
+	return "Risk and Authetication"
+    # return request['teamType']
 
 def getProgramsFromRequest(request):
 	# res = []
 	# res.append("R")
-	# res.append("Account Level Management (ALM)")
+	return "Account Level Management (ALM)"
 	# return res
-        return request['programname']
+    # return request['programname']
 
 def getAllUsers(request):
 	return db.getAllEmployees()
@@ -276,12 +289,12 @@ def getDataFromPMApprovalRequest(request):
 print "Smoke Test Begin .. "
 
 # @simple test for service
-print "__Service__"
+# print "__Service__"
 
 # @simple test for database
-print "__DataBase__"
+# print "__DataBase__"
 
-print "__Web service calls__"
+# print "__Web service calls__"
 
 # >> First request method avaiable <<
 # w = createNewSimpleWorkFlowStage(None)
@@ -297,9 +310,10 @@ print "__Web service calls__"
 
 # >> PM approve request
 # PMApprove(None)
+# PMReject(None)
 
 
-print "__create employees__"
+# print "__create employees__"
 # employees
 # createNewEmployee("Kyle", "PM")
 # createNewEmployee("Tom", "Analyst")
